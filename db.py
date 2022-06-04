@@ -63,6 +63,20 @@ def update_columns(table: str, column: str, where_col: str, where_val: str, val:
     cursor.execute(f"UPDATE {table} SET {column} = '{val}' WHERE {where_col} = '{where_val}'")
     conn.commit()
 
+
+def fetch_new_words(table: str, columns: List[str], limit: int, user_id: str, code:str) -> List[Tuple]:
+    columns_joined = ", ".join(columns)
+    cursor.execute(f"SELECT {columns_joined} FROM {table} WHERE words.id NOT IN (SELECT word_id from users_words WHERE user_id = {user_id}) AND words.category_id = {code} LIMIT {limit}")
+    rows = cursor.fetchall()
+    result = []
+    for row in rows:
+        dict_row = {}
+        for index, column in enumerate(columns):
+            dict_row[column] = row[index]
+        result.append(dict_row)
+    return result
+
+
 def _init_db():
     """Инициализирует БД"""
     with open("createdb.sql", "r") as f:

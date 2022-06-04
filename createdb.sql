@@ -15,6 +15,7 @@ CREATE TABLE words(
    word_transcription varchar(50),
    word_translate varchar(50),
    category_id integer,
+   voice_id varchar(100),
    FOREIGN KEY (category_id)
        REFERENCES wordCategory (id)
 );
