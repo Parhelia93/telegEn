@@ -1,6 +1,5 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text, IDFilter
 from db import *
 
 
@@ -16,11 +15,10 @@ async def cmd_start(message: types.Message, state: FSMContext):
     )
 
 
-
-async def process_voice_command(message: types.Message):
-    await message.answer_voice('AwACAgIAAxkDAAIF9mKbb02Pp8rg01L_KTbBBArkkj-lAAKfGgACTyDgSPxoa4q8x8wZJAQ')
+# async def process_voice_command(message: types.Message):
+#     await message.answer_voice('AwACAgIAAxkDAAIF9mKbb02Pp8rg01L_KTbBBArkkj-lAAKfGgACTyDgSPxoa4q8x8wZJAQ')
 
 
 def register_handlers_common(dp: Dispatcher):
     dp.register_message_handler(cmd_start, commands="start", state="*")
-    dp.register_message_handler(process_voice_command, commands="voice", state='*')
+    # dp.register_message_handler(process_voice_command, commands="voice", state='*')
