@@ -2,7 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from db import *
-from util.keyboard import generate_type_training
+from util.keyboard import generate_type_training, generate_know_training
 
 
 class ShowWords(StatesGroup):
@@ -22,15 +22,25 @@ async def train_words(message: types.Message, state: FSMContext):
     word_data = fetch_where('words', ['word', 'word_translate'], 'id', word_id)
     translate = word_data[0]['word_translate'] if code == '1' else word_data[0]['word']
     wrong_answer = user_data['wrongAnser']
+    true_answer = user_data['user_data'][cnt]['true_answer']
+
     if user_data['counter'] < len(user_data['user_data'])-1:
         if str(message.text.lower()) in translate.split(',') and wrong_answer<3:
             cnt += 1
+            true_answer+=1
+            update_columns('users_words', 'true_answer', 'word_id', word_id, true_answer)
             await state.update_data(wrongAnser=0)
             await state.update_data(counter=cnt)
+            await state.update_data(word_id=word_id)
             word_id = user_data['user_data'][cnt]['word_id']
             word_data = fetch_where('words', ['word', 'word_translate'], 'id', word_id)
             word = word_data[0]['word'] if code == '1' else word_data[0]['word_translate']
-            await message.answer(f'Правильно. Как переводится: {word}')
+            if true_answer < 2:
+                await message.answer(f'Правильно. Как переводится: {word}')
+            else:
+                keyword = generate_know_training()
+                await message.answer(f'Правильно.', reply_markup=keyword)
+
         elif wrong_answer==3:
             await message.answer(f'Перевод: {translate}')
             await state.update_data(wrongAnser=0)
@@ -59,8 +69,34 @@ async def process_callback_type_train(callback_query: types.CallbackQuery, state
     await callback_query.message.answer(f'Как переводится слово: {word}')
 
 
+async def process_callback_know_train(callback_query: types.CallbackQuery, state: FSMContext):
+    code = int(callback_query.data[-1])
+    user_data = await state.get_data()
+    cnt = user_data['counter']
+    code = user_data['code']
+    word_id = user_data['user_data'][cnt]['word_id']
+    word_data = fetch_where('words', ['word', 'word_translate'], 'id', word_id)
+    translate = word_data[0]['word_translate'] if code == '1' else word_data[0]['word']
+    wrong_answer = user_data['wrongAnser']
+    true_answer = user_data['user_data'][cnt]['true_answer']
+    wrd = user_data['word_id']
+    await callback_query.message.answer(type(code))
+    if code == '1':
+        await callback_query.message.answer(f'Запомнил. Как переводится: {word_data[0]["word"]}')
+        #cnt+=1
+        update_columns('users_words', 'stage', 'word_id', wrd, 1)
+        #await callback_query.message.answer(f'Обновить id {wrd}')
+        #await state.update_data(counter=cnt)
+    else:
+        await callback_query.message.answer(f'Запомнил. Как переводится: {word_data[0]["word"]}')
+        #cnt += 1
+        #await state.update_data(counter=cnt)
+
+
 def register_handlers_training(dp: Dispatcher):
     dp.register_message_handler(start_train_words, commands="training", state="*")
     dp.register_callback_query_handler(process_callback_type_train, lambda c: c.data and c.data.startswith('button'),
                                        state='*')
+    dp.register_callback_query_handler(process_callback_know_train, lambda c: c.data and c.data.startswith('know'),
+                                       state=ShowWords.train_words)
     dp.register_message_handler(train_words, state=ShowWords.train_words)

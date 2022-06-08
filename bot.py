@@ -10,6 +10,7 @@ from app.config_reader import load_config
 from app.handlers.showWords import register_handlers_words
 from app.handlers.common import register_handlers_common
 from app.handlers.training_words import register_handlers_training
+from app.handlers.quck_commands import register_handlersquick_cmd
 logger = logging.getLogger(__name__)
 
 
@@ -44,6 +45,7 @@ async def main():
     register_handlers_words(dp)
     register_handlers_common(dp)
     register_handlers_training(dp)
+    register_handlersquick_cmd(dp)
     # Установка команд бота
     await set_commands(bot)
 
