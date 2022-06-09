@@ -28,7 +28,8 @@ async def train_words(message: types.Message, state: FSMContext):
         if str(message.text.lower()) in translate.split(',') and wrong_answer<3:
             cnt += 1
             true_answer+=1
-            update_columns('users_words', 'true_answer', 'word_id', word_id, true_answer)
+            update_columns_and('users_words', 'true_answer', 'word_id', word_id, true_answer, 'user_id',
+                               message.from_user.id)
             await state.update_data(wrongAnser=0)
             await state.update_data(counter=cnt)
             await state.update_data(word_id=word_id)
@@ -62,7 +63,8 @@ async def train_words(message: types.Message, state: FSMContext):
 async def process_callback_type_train(callback_query: types.CallbackQuery, state: FSMContext):
     code = callback_query.data[-1]
     await ShowWords.train_words.set()
-    train_words_data = fetch_limit('users_words', ['word_id', 'true_answer', 'false_answer', 'stage'], 'user_id', str(callback_query.from_user.id),10)
+    train_words_data = fetch_limit_and('users_words', ['word_id', 'true_answer', 'false_answer', 'stage'], 'user_id',
+                                       str(callback_query.from_user.id), 10, 'stage', 0)
     await state.update_data(code=code, user_data=train_words_data, counter=0, wrongAnser=0)
     word_data = fetch_where('words', ['word','word_translate'],'id',train_words_data[0]['word_id'])
     word = word_data[0]['word'] if code == '1' else word_data[0]['word_translate']
@@ -70,7 +72,7 @@ async def process_callback_type_train(callback_query: types.CallbackQuery, state
 
 
 async def process_callback_know_train(callback_query: types.CallbackQuery, state: FSMContext):
-    code = int(callback_query.data[-1])
+    user_choice = callback_query.data[-1]
     user_data = await state.get_data()
     cnt = user_data['counter']
     code = user_data['code']
@@ -80,17 +82,13 @@ async def process_callback_know_train(callback_query: types.CallbackQuery, state
     wrong_answer = user_data['wrongAnser']
     true_answer = user_data['user_data'][cnt]['true_answer']
     wrd = user_data['word_id']
-    await callback_query.message.answer(type(code))
-    if code == '1':
+
+    if user_choice == '1':
         await callback_query.message.answer(f'Запомнил. Как переводится: {word_data[0]["word"]}')
-        #cnt+=1
-        update_columns('users_words', 'stage', 'word_id', wrd, 1)
-        #await callback_query.message.answer(f'Обновить id {wrd}')
-        #await state.update_data(counter=cnt)
+        update_columns_and('users_words', 'stage', 'word_id', wrd, 1, 'user_id', callback_query.from_user.id)
+
     else:
-        await callback_query.message.answer(f'Запомнил. Как переводится: {word_data[0]["word"]}')
-        #cnt += 1
-        #await state.update_data(counter=cnt)
+        await callback_query.message.answer(f'Ну ок. Как переводится: {word_data[0]["word"]}')
 
 
 def register_handlers_training(dp: Dispatcher):

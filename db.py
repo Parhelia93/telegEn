@@ -59,8 +59,27 @@ def fetch_limit(table: str, columns: List[str],where_column: str, where_val:str,
     return result
 
 
+def fetch_limit_and(table: str, columns: List[str],where_column: str, where_val:str,limit:int, where_column1: str, where_val1:str) -> List[Tuple]:
+    columns_joined = ", ".join(columns)
+    cursor.execute(f"SELECT {columns_joined} FROM {table} WHERE {where_column}={where_val} AND {where_column1}={where_val1} LIMIT {limit}")
+    rows = cursor.fetchall()
+    result = []
+    for row in rows:
+        dict_row = {}
+        for index, column in enumerate(columns):
+            dict_row[column] = row[index]
+        result.append(dict_row)
+    return result
+
+
+
 def update_columns(table: str, column: str, where_col: str, where_val: str, val:str):
     cursor.execute(f"UPDATE {table} SET {column} = '{val}' WHERE {where_col} = '{where_val}'")
+    conn.commit()
+
+
+def update_columns_and(table: str, column: str, where_col: str, where_val: str, val:str, where_col1: str, where_val1: str):
+    cursor.execute(f"UPDATE {table} SET {column} = '{val}' WHERE {where_col} = '{where_val}' AND {where_col1} = {where_val1}")
     conn.commit()
 
 

@@ -25,7 +25,10 @@ async def chose_cat(message: types.Message, state: FSMContext):
     await state.update_data(data_set=data, counter=1)
     keyboard = generate_keyboard()
     file_path = f'audio/{data[0]["word"]}.mp3'
-    await message.answer_voice(voice=open(file_path, "rb"), caption=f'Cлово: {data[0]["word"]}', reply_markup=keyboard)
+    try:
+        await message.answer_voice(voice=open(file_path, "rb"), caption=f'Cлово: {data[0]["word"]}', reply_markup=keyboard)
+    except:
+        await message.answer(f'Cлово: {data[0]["word"]}', reply_markup=keyboard)
 
 
 async def chose_word_result(call: types.CallbackQuery, state: FSMContext):
@@ -41,7 +44,11 @@ async def chose_word_result(call: types.CallbackQuery, state: FSMContext):
         word = user_data['data_set'][cnt]['word']
         keyword = generate_keyboard()
         file_path = f'audio/{word}.mp3'
-        await call.message.answer_voice(voice=open(file_path, "rb"), caption=f'Cлово: {word}',
+        try:
+            await call.message.answer_voice(voice=open(file_path, "rb"), caption=f'Cлово: {word}',
+                                        reply_markup=keyword)
+        except:
+            await call.message.answer(f'Cлово: {word}',
                                         reply_markup=keyword)
         cnt += 1
         await state.update_data(counter=cnt)
