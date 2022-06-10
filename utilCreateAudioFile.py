@@ -10,7 +10,7 @@ print(len(word_data))
 def generate_audio(word: str):
     s = gTTS(word)
     s.save(f'audio1/{word}.mp3')
-    time.sleep(5)
+    time.sleep(3)
 
 
 for i in word_data:
