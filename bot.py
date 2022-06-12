@@ -9,7 +9,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from app.config_reader import load_config
 from app.handlers.showWords import register_handlers_words
 from app.handlers.common import register_handlers_common
-from app.handlers.training_words import register_handlers_training
+from app.handlers.training_word import register_handlers_training
 from app.handlers.quck_commands import register_handlersquick_cmd
 logger = logging.getLogger(__name__)
 

@@ -73,6 +73,12 @@ def fetch_limit_and(table: str, columns: List[str],where_column: str, where_val:
 
 
 
+def update_columnss(table: str, columns: List[str], values: List[str], where_col: str, where_val: str):
+    cursor.execute(f"UPDATE {table} SET {columns[0]} = '{values[0]}', {columns[1]} = '{values[1]}', {columns[2]} = '{values[2]}' WHERE {where_col} = '{where_val}'")
+    conn.commit()
+
+
+
 def update_columns(table: str, column: str, where_col: str, where_val: str, val:str):
     cursor.execute(f"UPDATE {table} SET {column} = '{val}' WHERE {where_col} = '{where_val}'")
     conn.commit()

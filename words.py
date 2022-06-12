@@ -9,7 +9,7 @@ class NewWord(NamedTuple):
     stage: int
     word: str
     word_translate: str
-    answer_result: bool
+    answer_result: int
 
 
 class DataSet:
@@ -39,12 +39,21 @@ class DataSet:
             self.counter += 1
             return NewWord(word_id=word['word_id'], true_answer=word['true_answer'], false_answer=word['false_answer'],
                            stage=word['stage'], word=word['word'], word_translate=word['word_translate'],
-                           answer_result=False)
+                           answer_result=0)
         else:
             return None
 
+    def save_word(self, word_data: NewWord):
+        word = self.dataset[self.counter-1]
+        word['word_id'] = word_data.word_id
+        word['true_answer'] = word_data.true_answer
+        word['false_answer'] = word_data.false_answer
+        word['stage'] = word_data.stage
+        word['word'] = word_data.word
+        word['word_translate'] = word_data.word_translate
 
-d = DataSet('132166344', 'button1')
-s = d.get_new_word()
-print(s.word, s.word_translate)
+    def save_data_set(self):
+        for data in self.dataset:
+            db.update_columnss('users_words', ['true_answer','false_answer','stage'],
+                               [data['true_answer'],data['false_answer'],data['stage']], 'word_id', data['word_id'])
 
