@@ -10,6 +10,7 @@ class ShowWords(StatesGroup):
 
 
 async def start_show_words(message: types.Message, state: FSMContext):
+    await state.finish()
     await ShowWords.show_words.set()
     data_set = ShowDataSet(message.from_user.id)
     await state.update_data(data_set=data_set)

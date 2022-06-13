@@ -9,7 +9,8 @@ class ShowWords(StatesGroup):
     train_words = State()
 
 
-async def start_train_words(message: types.Message):
+async def start_train_words(message: types.Message, state: FSMContext):
+    await state.finish()
     keyword = generate_type_training()
     await message.answer(f'Выберите тип тренировки', reply_markup=keyword)
 
