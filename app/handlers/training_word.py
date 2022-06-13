@@ -2,7 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from util.keyboard import generate_type_training, generate_know_training
-from words import DataSet, NewWord
+from words import DataSet
 
 
 class ShowWords(StatesGroup):
@@ -23,6 +23,7 @@ async def process_callback_type_train(callback_query: types.CallbackQuery, state
         await callback_query.message.answer(f'Как переводится слово: {new_word.word}')
     else:
         await callback_query.message.answer('Словарь пуст')
+    await callback_query.answer(show_alert=False)
 
 
 async def train_words(message: types.Message, state: FSMContext):
@@ -39,6 +40,10 @@ async def train_words(message: types.Message, state: FSMContext):
             await message.answer('Верно', reply_markup=keyword)
         elif response.answer_result == 2:
             await message.answer('Try again')
+            await state.update_data(dataset=data_set, new_word=response)
+        elif response.answer_result == 3:
+            await state.update_data(dataset=data_set, new_word=response)
+            await message.answer(f'Как переводится слово: {response.word}')
     else:
         await state.finish()
         await message.answer('Training done')
@@ -54,6 +59,7 @@ async def process_callback_know_train(callback_query: types.CallbackQuery, state
     else:
         await callback_query.message.answer(f'Training done')
         await state.finish()
+    await callback_query.answer(show_alert=False)
 
 
 def register_handlers_training(dp: Dispatcher):

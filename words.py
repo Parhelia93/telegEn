@@ -1,5 +1,4 @@
 import db
-from typing import NamedTuple
 from dataclasses import dataclass
 
 
@@ -22,6 +21,7 @@ class DataSet:
         self.counter = 0
         self.dataset = self.get_user_dataset()
         self.train_limit = len(self.dataset)
+        self.wrong_answer = 0
 
     def get_user_dataset(self):
         dataset = db.fetch_limit_and('users_words', ['word_id', 'true_answer', 'false_answer', 'stage'],
@@ -38,6 +38,7 @@ class DataSet:
         return db.fetch_where('words', ['word', 'word_translate'], 'id', word_id)
 
     def get_new_word(self):
+        self.wrong_answer = 0
         if self.counter < self.train_limit:
             word = self.dataset[self.counter]
             self.counter += 1
@@ -73,19 +74,29 @@ class DataSet:
 
     def check_answer(self, answer: str):
         current_word = self.get_current_word()
-        if answer == current_word.word_translate and current_word.true_answer < 2:
+        current_word_arr = current_word.word_translate.split(', ')
+
+        if answer in current_word_arr and current_word.true_answer < 2:
             current_word.true_answer += 1
             self.save_word(current_word)
             new_word = self.get_new_word()
             return new_word
-        elif answer == current_word.word_translate and current_word.true_answer >= 2:
+        elif answer in current_word_arr and current_word.true_answer >= 2:
             current_word.true_answer += 1
             self.save_word(current_word)
             current_word.answer_result = 1
             return current_word
-        elif answer != current_word.word_translate:
+        elif answer not in current_word_arr and self.wrong_answer < 2:
+            self.wrong_answer += 1
+            current_word.false_answer += 1
             current_word.answer_result = 2
             return current_word
+        elif answer not in current_word_arr and self.wrong_answer >= 2:
+            current_word.answer_result = 3
+            current_word.false_answer += 1
+            self.save_word(current_word)
+            new_word = self.get_new_word()
+            return new_word
 
     def check_user_choice(self, choice: str):
         user_choice = choice[-1]
