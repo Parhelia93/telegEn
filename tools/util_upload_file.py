@@ -5,7 +5,7 @@ from aiogram import Bot
 from db import *
 bot = Bot(token='5372120570:AAGKSmF9UYftARHQrsmv19V_R7EdVGiSGSs')
 
-BASE_MEDIA_PATH = './audio'
+BASE_MEDIA_PATH = '../audio'
 
 logging.basicConfig(format=u'%(filename)s [ LINE:%(lineno)+3s ]#%(levelname)+8s [%(asctime)s]  %(message)s',
                     level=logging.DEBUG)

@@ -40,7 +40,7 @@ async def chose_word_result(call: types.CallbackQuery, state: FSMContext):
                                             caption=f'Cлово: {response.word} - {response.word_translate}',
                                             reply_markup=keyword)
         except:
-            await call.message.answer(f'Cлово: {response.word}',
+            await call.message.answer(f'Cлово: {response.word} - {response.word_translate}',
                                       reply_markup=keyword)
         await state.update_data(data_set=data_set)
     else:
