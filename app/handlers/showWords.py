@@ -23,7 +23,7 @@ async def start_show_words(message: types.Message, state: FSMContext):
                                        caption=f'Cлово: {word.word} - {word.word_translate}',
                                        reply_markup=keyboard)
         except:
-            await message.answer(f'Cлово: {word.word}', reply_markup=keyboard)
+            await message.answer(f'Cлово: {word.word} - {word.word_translate}', reply_markup=keyboard)
     else:
         await message.answer("Вы выучили все слова")
 
