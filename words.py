@@ -72,10 +72,16 @@ class DataSet:
                        false_answer=current_word['false_answer'],stage=current_word['stage'],word=current_word['word'],
                        word_translate=current_word['word_translate'],answer_result=0)
 
+    def get_last_word(self):
+        current_word = self.dataset[self.counter - 2]
+        return NewWord(word_id=current_word['word_id'],true_answer=current_word['true_answer'],
+                       false_answer=current_word['false_answer'],stage=current_word['stage'],word=current_word['word'],
+                       word_translate=current_word['word_translate'],answer_result=0)
+
     def check_answer(self, answer: str):
         current_word = self.get_current_word()
         current_word_arr = current_word.word_translate.split(', ')
-
+        dont_know = ['не знаю', 'хз', 'Не знаю']
         if answer in current_word_arr and current_word.true_answer < 2:
             current_word.true_answer += 1
             self.save_word(current_word)
@@ -84,18 +90,25 @@ class DataSet:
         elif answer in current_word_arr and current_word.true_answer >= 2:
             current_word.true_answer += 1
             self.save_word(current_word)
-            current_word.answer_result = 1
             return current_word
-        elif answer not in current_word_arr and self.wrong_answer < 2:
+        elif answer not in current_word_arr and self.wrong_answer < 2 and answer not in dont_know:
             self.wrong_answer += 1
             current_word.false_answer += 1
             current_word.answer_result = 2
             return current_word
-        elif answer not in current_word_arr and self.wrong_answer >= 2:
-            current_word.answer_result = 3
+        elif answer not in current_word_arr and self.wrong_answer >= 2 and answer not in dont_know:
             current_word.false_answer += 1
             self.save_word(current_word)
             new_word = self.get_new_word()
+            if new_word is not None:
+                new_word.answer_result = 3
+            return new_word
+        elif answer in dont_know:
+            self.wrong_answer += 1
+            self.save_word(current_word)
+            new_word = self.get_new_word()
+            if new_word is not None:
+                new_word.answer_result = 4
             return new_word
 
     def check_user_choice(self, choice: str):
@@ -105,3 +118,4 @@ class DataSet:
         cur_word.stage = stage
         self.save_word(cur_word)
         return self.get_new_word()
+

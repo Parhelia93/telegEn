@@ -10,17 +10,20 @@ from aiogram.dispatcher import FSMContext
 from db import *
 
 
-async def search_word(message: types.Message, state: FSMContext):
-    await state.finish()
+async def search_word(message: types.Message):
     user_id = message.from_user.id
-    word = f"'{message.text.replace('/w', '').strip()}'"
-    data = fetch_where('words', ['word', 'word_translate'], 'word', word)
+    word = message.text.strip().lower()
+    data = fetch_where_1('words', ['word', 'word_translate', 'id'], 'word', word)
     if len(data) != 0:
         file_path = f'audio/{data[0]["word"]}.mp3'
         try:
             await message.answer_voice(voice=open(file_path, "rb"), caption=f'Cлово: {data[0]["word"]} - {data[0]["word_translate"]}')
         except:
             await message.answer('Что-то пошло не так...')
+
+        word_data = fetch_where('users_words',['word_id'], 'word_id', data[0]['id'])
+        if len(word_data) == 0:
+            insert('users_words', {'word_id': data[0]['id'], 'user_id':user_id})
 
     else:
         await message.answer('В словаре нет такого слова')
@@ -39,5 +42,6 @@ async def cmd_show_learned_words(message: types.Message, state: FSMContext):
 
 
 def register_handlersquick_cmd(dp: Dispatcher):
-    dp.register_message_handler(search_word, lambda message: message.text.startswith('/w'), state="*")
+    #, lambda message: message.text.startswith('/w'),
+    dp.register_message_handler(search_word, lambda message: message.text, state="*")
     dp.register_message_handler(cmd_show_learned_words, commands="learned", state="*")

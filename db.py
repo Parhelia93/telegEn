@@ -45,6 +45,18 @@ def fetch_where(table: str, columns: List[str], where_column: str, where_val:str
         result.append(dict_row)
     return result
 
+def fetch_where_1(table: str, columns: List[str], where_column: str, where_val:str) -> List[Tuple]:
+    columns_joined = ", ".join(columns)
+    cursor.execute(f"SELECT {columns_joined} FROM {table} WHERE {where_column}='{where_val}'")
+    rows = cursor.fetchall()
+    result = []
+    for row in rows:
+        dict_row = {}
+        for index, column in enumerate(columns):
+            dict_row[column] = row[index]
+        result.append(dict_row)
+    return result
+
 
 def fetch_limit(table: str, columns: List[str],where_column: str, where_val:str,limit:int) -> List[Tuple]:
     columns_joined = ", ".join(columns)

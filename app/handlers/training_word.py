@@ -31,6 +31,7 @@ async def train_words(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
     data_set = user_data['dataset']
     response = data_set.check_answer(message.text.lower())
+
     if response is not None:
         if response.answer_result == 0:
             await state.update_data(dataset=data_set, new_word=response)
@@ -43,6 +44,13 @@ async def train_words(message: types.Message, state: FSMContext):
             await message.answer('Try again')
             await state.update_data(dataset=data_set, new_word=response)
         elif response.answer_result == 3:
+            last_word = data_set.get_last_word()
+            await message.answer(f'Слово: {last_word.word}, перевод: {last_word.word_translate}')
+            await state.update_data(dataset=data_set, new_word=response)
+            await message.answer(f'Как переводится слово: {response.word}')
+        elif response.answer_result == 4:
+            last_word = data_set.get_last_word()
+            await message.answer(f'Слово: {last_word.word}, перевод: {last_word.word_translate}')
             await state.update_data(dataset=data_set, new_word=response)
             await message.answer(f'Как переводится слово: {response.word}')
     else:
