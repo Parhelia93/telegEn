@@ -30,7 +30,6 @@ class DataSet:
             data_info = self.get_word_info(data['word_id'])
             data['word'] = data_info[0]['word'] if self.user_choice == '1' else data_info[0]['word_translate']
             data['word_translate'] = data_info[0]['word_translate'] if self.user_choice == '1' else data_info[0]['word']
-
         return dataset
 
     @staticmethod
@@ -46,7 +45,6 @@ class DataSet:
                            stage=word['stage'], word=word['word'], word_translate=word['word_translate'],
                            answer_result=0)
         else:
-            self.save_data_set()
             return None
 
     def save_word(self, word_data: NewWord):
@@ -57,11 +55,9 @@ class DataSet:
         word['stage'] = word_data.stage
         word['word'] = word_data.word
         word['word_translate'] = word_data.word_translate
-
-    def save_data_set(self):
-        for data in self.dataset:
-            db.update_columnss('users_words', ['true_answer','false_answer','stage'],
-                               [data['true_answer'],data['false_answer'],data['stage']], 'word_id', data['word_id'])
+        db.update_columnss('users_words', ['true_answer', 'false_answer', 'stage'],
+                           [str(word_data.true_answer), str(word_data.false_answer), str(word_data.stage)],
+                           'word_id', str(word_data.word_id))
 
     def get_train_limit(self):
         return self.train_limit
@@ -90,11 +86,13 @@ class DataSet:
         elif answer in current_word_arr and current_word.true_answer >= 2:
             current_word.true_answer += 1
             self.save_word(current_word)
+            current_word.answer_result = 1
             return current_word
         elif answer not in current_word_arr and self.wrong_answer < 2 and answer not in dont_know:
             self.wrong_answer += 1
             current_word.false_answer += 1
             current_word.answer_result = 2
+            self.save_word(current_word)
             return current_word
         elif answer not in current_word_arr and self.wrong_answer >= 2 and answer not in dont_know:
             current_word.false_answer += 1
@@ -105,6 +103,7 @@ class DataSet:
             return new_word
         elif answer in dont_know:
             self.wrong_answer += 1
+            current_word.false_answer += 1
             self.save_word(current_word)
             new_word = self.get_new_word()
             if new_word is not None:
