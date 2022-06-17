@@ -43,5 +43,5 @@ async def cmd_show_learned_words(message: types.Message, state: FSMContext):
 
 def register_handlersquick_cmd(dp: Dispatcher):
     #, lambda message: message.text.startswith('/w'),
-    dp.register_message_handler(search_word, lambda message: message.text, state="*")
     dp.register_message_handler(cmd_show_learned_words, commands="learned", state="*")
+    dp.register_message_handler(search_word, lambda message: message.text, state="*")

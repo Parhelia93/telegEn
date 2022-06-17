@@ -31,7 +31,7 @@ async def train_words(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
     data_set = user_data['dataset']
     response = data_set.check_answer(message.text.lower())
-    await message.answer(str(response))
+    #await message.answer(str(response))
     if response is not None:
         if response.answer_result == 0:
             await state.update_data(dataset=data_set, new_word=response)
